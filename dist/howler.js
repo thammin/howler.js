@@ -2125,7 +2125,7 @@
 
       var sampleRate = 44100;
       var channels = 1;
-      var samples = arraybuffer.length / channels;
+      var samples = bytesarray.length / channels;
       try {
         var audioBuf = Howler.ctx.createBuffer(channels, samples, sampleRate);
         audioBuf.getChannelData(0).set(bytesarray);
