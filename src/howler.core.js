@@ -2114,15 +2114,38 @@
    * @param  {Howl}        self
    */
   var decodeAudioData = function(arraybuffer, self) {
-    // Decode the buffer into an audio source.
-    Howler.ctx.decodeAudioData(arraybuffer, function(buffer) {
-      if (buffer && self._sounds.length > 0) {
-        cache[self._src] = buffer;
-        loadSound(self, buffer);
+    /** 
+     * Decode blob data to audio buffer manually
+     * TODO: 
+     * hardcoded Float32Array and mono channel only.
+     * More Standard detection is needed.
+     */
+    if (/^blob\:/.test(self._src)) {
+      var bytesarray = new Float32Array(arraybuffer);
+
+      var sampleRate = 44100;
+      var channels = 1;
+      var samples = arraybuffer.length / channels;
+      try {
+        var audioBuf = Howler.ctx.createBuffer(channels, samples, sampleRate);
+        audioBuf.getChannelData(0).set(bytesarray);
+
+        cache[self._src] = audioBuf;
+        loadSound(self, audioBuf);
+      } catch(e) {
+        self._emit('loaderror', null, 'Decoding audio data failed.');
       }
-    }, function() {
-      self._emit('loaderror', null, 'Decoding audio data failed.');
-    });
+    } else {
+      // Decode the buffer into an audio source.
+      Howler.ctx.decodeAudioData(arraybuffer, function(buffer) {
+        if (buffer && self._sounds.length > 0) {
+          cache[self._src] = buffer;
+          loadSound(self, buffer);
+        }
+      }, function() {
+        self._emit('loaderror', null, 'Decoding audio data failed.');
+      });
+    }
   };
 
   /**
