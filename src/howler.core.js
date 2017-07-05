@@ -473,6 +473,7 @@
       self._sprite = o.sprite || {};
       self._src = (typeof o.src !== 'string') ? o.src : [o.src];
       self._volume = o.volume !== undefined ? o.volume : 1;
+      self._blobFormat = o.blobFormat || {};
 
       // Setup all other default properties.
       self._duration = 0;
@@ -2123,7 +2124,7 @@
     if (/^blob\:/.test(self._src)) {
       var bytesarray = new Float32Array(arraybuffer);
 
-      var sampleRate = 44100;
+      var sampleRate = self._blobFormat.sampleRate || 44100;
       var channels = 1;
       var samples = bytesarray.length / channels;
       try {
