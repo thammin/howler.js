@@ -2118,18 +2118,24 @@
     /** 
      * Decode blob data to audio buffer manually
      * TODO: 
-     * hardcoded Float32Array and mono channel only.
+     * hardcoded Float32Array.
      * More Standard detection is needed.
      */
     if (/^blob\:/.test(self._src)) {
       var bytesarray = new Float32Array(arraybuffer);
 
       var sampleRate = self._blobFormat.sampleRate || 44100;
-      var channels = 1;
+      var channels = self._blobFormat.channelsPerFrame || 1;
       var samples = bytesarray.length / channels;
       try {
         var audioBuf = Howler.ctx.createBuffer(channels, samples, sampleRate);
-        audioBuf.getChannelData(0).set(bytesarray);
+        var audioChans = [];
+        for(var i = 0; i < channels; i++) {
+            audioChans.push(audioBuf.getChannelData(i));
+        }
+        for(var i = 0; i < bytesarray.length; i++) {
+            audioChans[i % channels][Math.round(i / channels)] = bytesarray[i];
+        }
 
         cache[self._src] = audioBuf;
         loadSound(self, audioBuf);
